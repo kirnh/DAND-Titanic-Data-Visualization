@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+ 
+<head>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+
+  <style>
+    h1 {
+      font-family: sans-serif;
+      font-size: 23px;
+      margin-bottom: 2em;
+    }
+
+    button{
+      align-self: center;
+      background-color: #e7e7e7;
+      padding: 2px 2px;
+      font-size: 14px;
+      width: 300px;
+      text-align: center;
+      border-radius: 5px;
+      transition-duration: 0.4s;
+      cursor: pointer;
+  }
+
+    button:hover {
+      background-color: #555555;
+      color: white;
+  }
+
+    p{
+      text-align: left;
+      font-family: sans-serif;
+      font-size: 18px;
+      margin-left: 10%;
+      margin-right: 10%;
+    }
+
+    myChart.gridline {
+    	opacity: 0;
+    }
+  </style>
+
+</head>
+
+<body align = "center">
+
+    <button id="btn_1">Survival Rate by Class of travel</button>
+    <button id="btn_2">Survival Rate by Gender</button>
+    <button id="btn_3">Survival Rate by Age group</button>    
+  
+</body>
+    
+<script type="text/javascript">
+
+    d3.select("body")
+      .append("h1")
+      .text("Factors affecting survival rate of passengers onboard the Titanic")
+
+    d3.select("body")
+      .append("p")
+      .text("The sinking of the RMS Titanic occurred on the night of 14 April through to the morning of 15 April 1912 in the North Atlantic Ocean, four days into the ship's maiden voyage from Southampton to New York City. The ship hosted 2,224 passengers and crew out of which more than 1500 died when she struck an iceberg at around 23:40 (ship's time) on Sunday, 14 April 1912.")
+
+    d3.select("body")
+      .append("p")
+      .text("The limited number of lifeboats available seem to have caused such a huge number of lives to be lost. By analysing the dataset containing data about 891 passengers of the 2224 passengers onboard the ship when it sank, we find various factors affecting the survival rate. Female survival rates are seen to be higher than that of males. And when we group passengers by class, we see that surival rate of passengers travelling first class is higher than that of second class and third class travelling passengers. Also, children below the age of 13 survived the best when compared to teen, adult or senior passengers. These statistics through the following graphs tell us that females, children and the rich had a higher rate of surviving the sinking of the Titanic.")
+
+    d3.select("body")
+      .append("p")
+      .text("These variations in survival rates among different groups of passengers can be seen by toggling the buttons at the top of the page.")
+
+    "use strict";
+    var margin = 100,
+        width = 1000 - margin,
+        height = 400 - margin;
+
+    var svg = d3.select("body")
+                .append("svg")
+                .attr('class', 'svg')
+                .attr("width", width + margin)
+                .attr("height", height + margin)
+                .append('g')
+                .attr('class', 'chart');
+
+    // update_lebels(data) takes in the Titanic dataset as input and changes the values in Survived field from '1' to 'Survived' and '0' to 'Died'.  
+
+    function update_labels(data) {
+      data.forEach(function(d) {
+            d['Survived'] = d['Survived'].replace('0', 'Died');
+            d['Survived'] = d['Survived'].replace('1', 'Survived');
+          });
+    }
+
+    function draw(data1) {
+
+          update_labels(data1);
+
+          //  Dimple.js Chart construction code
+
+          d3.select("#btn_1").on("click", function() {
+                svg.select("*").remove();
+                var myChart = new dimple.chart(svg, data1);
+                var x = myChart.addCategoryAxis("x", "Pclass");
+                x.title = "Class of travel";
+                x.fontSize = "13px";
+                var y = myChart.addPctAxis("y", "PassengerId");
+                y.addOrderRule(['Survived', 'Died']);
+                y.title = "% Survived / Died by Class";
+                y.fontSize = "13px";
+                mySeries = myChart.addSeries("Survived", dimple.plot.bar);
+                mySeries.addOrderRule(['Survived', 'Died']);
+                myChart.addLegend(60, 10, 505, 20, "right");
+                myChart.ease = 'linear';
+                myChart.draw(500);
+              });
+
+          d3.select("#btn_2").on("click", function() {
+                svg.select("*").remove();
+                var myChart = new dimple.chart(svg, data1);
+                var x = myChart.addCategoryAxis("x", "Sex");
+                x.fontSize = "13px";
+                x.addOrderRule(['female', 'male']);
+                x.title = "Gender";
+                var y = myChart.addPctAxis("y", "PassengerId");
+                y.title = "% Survived / Died by Gender";
+                y.fontSize = "13px";
+                mySeries = myChart.addSeries("Survived", dimple.plot.bar);
+                mySeries.addOrderRule(['Survived', 'Died']);
+                myChart.addLegend(60, 10, 505, 20, "right");
+                myChart.ease = 'linear';
+                myChart.draw(500);
+              });
+    };
+
+      // draw_age_group_chart(data2) takes in the titanic_modified.csv dataset that is a modified version of the original titanic_data.csv with missing age values removed and an additional Age_group field added. This function and the modified dataset is used to plot the Survival Rate by Age group graph.
+
+      function draw_age_group_chart(data2) {
+
+            update_labels(data2);
+
+            //  Dimple.js Chart construction code
+
+            d3.select("#btn_3").on("click", function() {
+                svg.select("*").remove();
+                var myChart = new dimple.chart(svg, data2);
+                var x = myChart.addCategoryAxis("x", "Age_group");
+                x.title = "Age Group";
+                x.fontSize = "13px";
+                x.addOrderRule(['0-13', '14-19', '20-60', '60+']);
+                var y = myChart.addPctAxis("y", "PassengerId");
+                y.fontSize = "13px";
+                y.title = "% Survived / Died by Age group";
+                myChart.addSeries("Survived", dimple.plot.bar);
+                myChart.addLegend(60, 10, 505, 20, "right");
+                myChart.ease = 'linear';
+                myChart.draw(500);
+              });
+
+        };
+
+        d3.csv('titanic_data.csv', draw);
+        d3.csv('titanic_modified.csv', draw_age_group_chart);
+</script>
+
+</html>
